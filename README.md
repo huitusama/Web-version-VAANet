@@ -51,7 +51,9 @@ A web version for VAANet-Multimodal emotion recognition Model
 /tools/video2mp3.py
 ```
 
-运行：
+---
+
+## 运行：
 Assume the strcture of data directories is the following:
 ~/
   VideoEmotion8--imgs
@@ -71,6 +73,7 @@ python main.py
 ```
 进行模型训练
 
+---
 
 ## 致谢
 
