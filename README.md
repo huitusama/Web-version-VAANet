@@ -66,8 +66,9 @@ Assume the strcture of data directories is the following:
       .../ (mp3 files)
   results
   ve8_01.json
-Confirm all options in ~/opts.py.
 ```
+
+Confirm all options in ~/opts.py.
 
 运行
 ```bash
