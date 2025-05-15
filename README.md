@@ -55,6 +55,7 @@ A web version for VAANet-Multimodal emotion recognition Model
 
 ## 运行：
 Assume the strcture of data directories is the following:
+```bash
 ~/
   VideoEmotion8--imgs
     .../ (directories of class names)
@@ -66,6 +67,7 @@ Assume the strcture of data directories is the following:
   results
   ve8_01.json
 Confirm all options in ~/opts.py.
+```
 
 运行
 ```bash
