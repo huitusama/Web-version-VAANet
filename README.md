@@ -1,4 +1,4 @@
-# Web-version-VAANet
+# Web_version_emotion_recognition_VAANet
 A web version for VAANet-Multimodal emotion recognition Model
 
 基于以下两个项目，实现了一个 **Web 端多模态情感识别模型**：
