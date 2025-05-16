@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实时情绪识别</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+        #emotion { font-size: 24px; font-weight: bold; color: #007bff; text-align: left; list-style-type: none; padding: 0; }
+        .emotion-list { display: flex; justify-content: center; }
+        #max-emotion { font-size: 20px; font-weight: bold; color: #ff4500; margin-top: 10px; }
+        button { padding: 10px 20px; font-size: 18px; margin: 10px; }
+        #chart-container { width: 50%; margin: 30px auto; }
+
+	/* 新增：摄像头图像样式 */
+        #camera-feed {             /* 新增 */
+            width: 480px;          /* 新增 */
+            height: auto;          /* 新增 */
+            border: 2px solid #ccc; /* 新增 */
+            margin: 20px auto;     /* 新增 */
+            display: block;        /* 新增 */
+        }  
+    </style>
+</head>
+<body>
+
+    <h1>实时情绪识别</h1>
+
+    <!-- 新增：摄像头图像显示 -->
+    <img id="camera-feed" src="" alt="Camera Feed"> <!-- 新增 -->
+
+    <p>当前识别结果：</p>
+    <div class="emotion-list">
+        <ul id="emotion">
+            <li>等待检测...</li>
+        </ul>
+    </div>
+
+    <p id="max-emotion">概率最大情绪: 等待检测...</p>
+
+    <button onclick="startDetection()">开始识别</button>
+    <button onclick="stopDetection()">停止识别</button>
+
+    <!-- 饼状图 -->
+    <div id="chart-container">
+        <canvas id="emotionPieChart"></canvas>
+    </div>
+
+    <script>
+        var socket = io();
+
+        var ctx = document.getElementById("emotionPieChart").getContext("2d");
+
+        var emotionLabels = ["生气", "期待", "厌恶", "恐惧", "开心", "伤心", "惊讶", "信任"];
+        var emotionData = {
+            labels: emotionLabels,
+            datasets: [{
+                data: Array(8).fill(0), // 初始化数据
+                backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF", "#FF9F40", "#C9CBCF", "#8D3DAF"]
+            }]
+        };
+
+        var emotionPieChart = new Chart(ctx, {
+            type: "pie",
+            data: emotionData,
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+
+        function startDetection() {
+            socket.emit('start_detection');
+            console.log("已发送开始识别请求");
+        }
+
+        function stopDetection() {
+            socket.emit('stop_detection');
+            console.log("已发送停止识别请求");
+        }
+
+        socket.on('update_emotion', function(data) {
+            var emotionList = document.getElementById('emotion');
+            var maxEmotion = document.getElementById('max-emotion');
+
+            emotionList.innerHTML = ""; // 清空列表
+
+            data.emotions.forEach(function(item) {
+                var listItem = document.createElement('li');
+                listItem.innerText = item.emotion + ": " + item.probability; // 直接使用已有百分比数据
+                emotionList.appendChild(listItem);
+            });
+
+            maxEmotion.innerText = "概率最大情绪: " + data.max_emotion.emotion + " (" + data.max_emotion.probability + ")";
+
+            // 更新饼图数据（去掉 % 号转换为 float）
+            emotionPieChart.data.labels = data.emotions.map(item => item.emotion);
+            emotionPieChart.data.datasets[0].data = data.emotions.map(item => parseFloat(item.probability.replace('%', '')));
+            emotionPieChart.update();
+        });
+
+	 // 新增：接收摄像头图像帧
+         socket.on('camera_frame', function(data) {         // 新增
+             const img = document.getElementById('camera-feed'); // 新增
+             img.src = 'data:image/jpeg;base64,' + data.image;   // 新增
+         });
+    </script>
+
+</body>
+</html>
